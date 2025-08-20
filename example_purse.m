@@ -15,7 +15,7 @@ Q = eye(3);
 
 sol = modified_purse_lass_sedumi(purse,P,Q,kappa);
 
-t_rad = sol.upper_bound;
+translation_rad_cheb = sol.upper_bound;
 
 %% GRCC for Rotation with kappa = 3
 
@@ -25,24 +25,26 @@ kappa = 3;
 R_set = cat(3, R_set{:});
 % check the max distance
 [~,~,avg_info] = maxRotationDist(Ravg,purse,2);
-rad_avg = rad2deg(acos(1 - avg_info.f_sdp / 4));
-if rad_avg > 90
+rotation_rad_avg = rad2deg(acos(1 - avg_info.f_sdp / 4));
+if rotation_rad_avg > 90
     fprintf("The distance is too large: %.2f, skip this one!\n",rad_avg)
 end
+[~,~,t_info] = maxTranslationDist(tavg,purse,2);
+translation_rad_avg = sqrt(t_info.f_sdp);
 
 %% Calculate the performance of the average pose
 q_avg = rotm2quat(Ravg);
 q_avg = q_avg(:);
 
-%% Calculate the performace of the 'be
+%% Calculate the performace of the 'best‘
 [center,sol] = get_quat_cent2(purse,kappa,q_avg);
 center = center/norm(center);
 r_cent = quat2rotm(center');
 [R2,t2,Rinfo2] = maxRotationDist(r_cent,purse,2);
-rad_cheb = rad2deg(acos(1 - Rinfo2.f_sdp / 4));
+rotation_rad_cheb = rad2deg(acos(1 - Rinfo2.f_sdp / 4));
 
-
-fprintf("\n Avg rad: %.2f\n Cheb rad: %.2f \n", rad_avg, rad_cheb);
+fprintf("\n Translation:\n Avg rad: %.2f\n Cheb rad: %.2f \n", translation_rad_avg, translation_rad_cheb);
+fprintf("\n Rotation:\n Avg rad: %.2f\n Cheb rad: %.2f \n", rotation_rad_avg, rotation_rad_cheb);
 
 
 function [center,sol] = get_quat_cent2(purse,kappa,q_avg)
